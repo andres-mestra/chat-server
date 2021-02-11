@@ -7,9 +7,9 @@ const UsuarioShema = Schema({
     required: true,
   },
   email: {
-    typee: String,
+    type: String,
     required: true,
-    uniquie: true,
+    unique: true,
   },
   password: {
     type: String,
