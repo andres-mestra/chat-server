@@ -1,5 +1,6 @@
 const argon2 = require('argon2');
-const  { response } = require('express')
+const  { response } = require('express');
+const generarJWT = require('../helpers/generarJWT');
 const Usuario = require(('../models/usuario'))
 
 const crearUsuario = async (req, res = response ) => {
@@ -16,15 +17,17 @@ const crearUsuario = async (req, res = response ) => {
     }
 
     usuario = new Usuario(req.body)
+    //Encriptar contraseña
     usuario.password = await argon2.hash( password )
+    //Guardar usuario
     await usuario.save(); 
-    usuario = usuario.toJSON()
-    
+    //Generar el JWT
+    const token = await generarJWT(usuario.uid)
 
     return res.status(201).json({
       ok: true,
-      uid: usuario.uid,
-      nombre: usuario.nombre,
+      usuario: usuario.toJSON(),
+      token
     })
 
     
@@ -42,12 +45,43 @@ const login = async (req, res = response) => {
 
   const { email, password } = req.body;
 
-  return res.json({
-    ok: true,
-    msg: 'login',
-    email,
-    password,
-  })
+  try {
+
+    const usuario =  await Usuario.findOne({ email })
+    //Verificar si el email existe
+    if(!usuario){
+      return res.status(404).json({
+        ok: false,
+        msg: 'Email o Password no es correcto'
+      })
+    }
+
+    //Verificar el password
+    const validPassword = await argon2.verify( usuario.password, password )
+    if ( !validPassword ) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'Password o Email no es correcto'
+      })
+    }
+
+    //Generar token
+    const token  = await generarJWT(usuario.id);
+
+    return res.status(201).json({
+      ok: true,
+      usuario: usuario.toJSON(),
+      token
+    })
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false, 
+      msg: 'Hable con el administrador'
+    })
+  }
+
 }
 
 const renewToke = async (req, res = response) => {
