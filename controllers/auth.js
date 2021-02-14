@@ -1,6 +1,6 @@
 const argon2 = require('argon2');
 const  { response } = require('express');
-const generarJWT = require('../helpers/generarJWT');
+const { generarJWT } = require('../helpers/generarJWT');
 const Usuario = require(('../models/usuario'))
 
 const crearUsuario = async (req, res = response ) => {
