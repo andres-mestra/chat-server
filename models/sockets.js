@@ -40,6 +40,9 @@ class Sockets {
             //Marcar en db que el usuario se desconecto
             socket.on('disconnect',  async () => {
                 await usuarioDesconectado(uid)
+                
+                //Emitir todos los usuarios conectados
+                this.io.emit('lista-de-usuarios', await getUsuarios())
             })
 
         });
