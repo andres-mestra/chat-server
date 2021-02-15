@@ -39,11 +39,12 @@ class Sockets {
             //Emitir todos los usuarios conectados
             this.io.emit('lista-de-usuarios', await getUsuarios())
 
-            //TODO: Socket join, uid
 
-            //TODO: Escuchar cuando el cliente envia un mensaje
+            //Escuchar cuando el cliente envia un mensaje
             socket.on('mensaje-personal', async (payload) => {
                 const mensaje = await grabarMensaje(payload)
+                this.io.to( payload.para ).emit('mensaje-personal', mensaje )
+                this.io.to( payload.de ).emit('mensaje-personal', mensaje )
             })
             //mensaje-personal
 
